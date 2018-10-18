@@ -10,6 +10,8 @@ import UIKit
 
 import MapKit
 import CoreLocation
+import Alamofire
+import AlamofireImage
 
 
 class MapVC: UIViewController, UIGestureRecognizerDelegate {
@@ -29,6 +31,9 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
     
     var flowLayout =  UICollectionViewFlowLayout()
     var collectionView: UICollectionView?
+    
+    var imageUrlArray = [String]()
+    var imageArray = [UIImage]()
     
     override func viewDidLoad() {
         
@@ -70,6 +75,7 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func animateViewDown(){
+        cencelAllSwssions()
         hightPullUpConstraint.constant = 0
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -79,7 +85,6 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
     
     func animateViewUp(){
        
-        
         
         UIView.animate(withDuration:0.3, animations: {
             self.hightPullUpConstraint.constant = 300
@@ -153,6 +158,7 @@ extension MapVC: MKMapViewDelegate{
         removePin()
         removeSpinner()
         removeProgressLbl()
+        cencelAllSwssions()
         
         
         animateViewUp()
@@ -172,12 +178,65 @@ extension MapVC: MKMapViewDelegate{
         mapView.addAnnotation(annotation)
         
         print(flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: 40))
+        retrieveUrls(forAnnotation: annotation) { (finished) in
+            if finished{
+                self.retrieveImages(handler: { (finished) in
+                    if finished{
+                        //hide spinner
+                        self.removeSpinner()
+                        self.removeProgressLbl()
+                        //hide lbl
+                        //reload collectionView
+                    }
+                })
+            }
+        }
         
     }
     
     func removePin(){
         for annotation in mapView.annotations{
             mapView.removeAnnotation(annotation)
+        }
+    }
+    
+    
+    
+    func retrieveUrls(forAnnotation annotation: DroppablePin, handler: @escaping (_ status: Bool) -> ()) {
+        imageUrlArray = []
+        
+        Alamofire.request(flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: 40)).responseJSON { (response) in
+            guard let json = response.result.value as? Dictionary<String, AnyObject> else { return }
+            let photosDict = json["photos"] as! Dictionary<String, AnyObject>
+            let photosArray = photosDict["photo"] as! [Dictionary<String, AnyObject>]
+            for photo in photosArray {
+                let postUrl = "https://farm\(photo["farm"]!).staticflickr.com/\(photo["server"]!)/\(photo["id"]!)_\(photo["secret"]!)_h_d.jpg"
+                self.imageUrlArray.append(postUrl)
+            }
+            handler(true)
+        }
+    }
+    
+    func retrieveImages(handler: @escaping (_ status: Bool)-> ()){
+        imageArray = []
+        for url in imageUrlArray{
+            Alamofire.request(url).responseImage { (response) in
+                guard let image = response.result.value else {return}
+                self.imageArray.append(image)
+                self.progressLbl?.text = "\(self.imageArray.count)/40 IMAGES DOWNLOADED"
+                
+                if self.imageArray.count == self.imageUrlArray.count{
+                    handler(true)
+                }
+            }
+        }
+        
+    }
+    
+    func cencelAllSwssions(){
+        Alamofire.SessionManager.default.session.getTasksWithCompletionHandler { (sessionDataTask, uploadData, downloadData) in
+            sessionDataTask.forEach({ ($0.cancel()) })
+            downloadData.forEach({ ($0.cancel()) })
         }
     }
     
@@ -217,6 +276,8 @@ extension MapVC: UICollectionViewDelegate, UICollectionViewDataSource{
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoCell", for: indexPath) as? PhotoCell
         return cell!
     }
+    
+    
     
 }
 
