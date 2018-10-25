@@ -13,7 +13,11 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var popImageView: UIImageView!
     
+    
+    @IBOutlet weak var descriptionLbl: UILabel!
+    
     var passedImage: UIImage!
+    
     
     
     override func viewDidLoad() {
@@ -22,10 +26,12 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
         addDoubleTap()
         // Do any additional setup after loading the view.
     }
+    
     func initData(withImage image:UIImage){
         self.passedImage = image
-        
+        //self.descriptionLbl
     }
+    
     func addDoubleTap(){
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector (screenWasDoubleTapped))
         doubleTap.numberOfTapsRequired = 2
