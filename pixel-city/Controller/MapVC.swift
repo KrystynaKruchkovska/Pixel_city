@@ -222,9 +222,13 @@ extension MapVC: MKMapViewDelegate{
                 
                 
                 let photoOwner = photo["ownername"]
+                let description = photo["description"]!["_content"]
+                let dateTaken = photo["datetaken"]
                 var imageInfo = ImageInfo()
                 imageInfo.url = postUrl
                 imageInfo.ownerName = (photoOwner as! String)
+                imageInfo.description = (description as! String)
+                imageInfo.dateTaken = dateTaken as! String
                 self.imageInfoArray.append(imageInfo)
             }
             

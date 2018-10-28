@@ -11,4 +11,6 @@ import UIKit
 struct ImageInfo {
     var url: String?
     var ownerName: String?
+    var description: String?
+    var dateTaken: String?
 }

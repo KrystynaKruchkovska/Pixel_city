@@ -10,6 +10,7 @@ import UIKit
 
 class PopVC: UIViewController, UIGestureRecognizerDelegate {
     
+    @IBOutlet weak var infoBtn: UIButton!
     
     @IBOutlet weak var popImageView: UIImageView!
     
@@ -17,6 +18,10 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var descriptionLbl: UILabel!
     
     @IBOutlet weak var ownerName: UILabel!
+    @IBOutlet weak var detaTaken: UILabel!
+    
+    
+    
     var passedImage: UIImage!
     var passedImageInfo: ImageInfo!
     
@@ -25,8 +30,11 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
         super.viewDidLoad()
         popImageView.image = passedImage
         ownerName.text = passedImageInfo.ownerName!
+        descriptionLbl.text = passedImageInfo.description
+        detaTaken.text = passedImageInfo.dateTaken
         addDoubleTap()
-        // Do any additional setup after loading the view.
+        
+        self.hideInfo()
     }
     
     func initData(withImage image:UIImage,imageInfo:ImageInfo){
@@ -44,6 +52,41 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
     @objc func screenWasDoubleTapped(){
         dismiss(animated: true, completion: nil)
     }
-
-
+    
+    @IBAction func infoBtnWasPressed(_ sender: Any) {
+        
+        
+        //        self.showInfo()
+        //
+        
+        
+        if isInfoHidden() {
+            self.showInfo()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.hideInfo()
+            }
+            
+        } else {
+            self.hideInfo()
+        }
+    }
+    
+    func showInfo() {
+        self.ownerName.isHidden = false
+        self.descriptionLbl.isHidden = false
+        self.detaTaken.isHidden = false
+    }
+    
+    func hideInfo() {
+        self.ownerName.isHidden = true
+        self.descriptionLbl.isHidden = true
+        self.detaTaken.isHidden = true
+    }
+    
+    func isInfoHidden()-> Bool {
+        return self.ownerName.isHidden      &&
+            self.descriptionLbl.isHidden &&
+            self.detaTaken.isHidden
+    }
+    
 }
