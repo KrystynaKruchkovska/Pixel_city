@@ -13,4 +13,5 @@ struct ImageInfo {
     var ownerName: String?
     var description: String?
     var dateTaken: String?
+    var views : String?
 }

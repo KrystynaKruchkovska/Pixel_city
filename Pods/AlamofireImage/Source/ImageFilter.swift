@@ -170,8 +170,8 @@ public struct ScaledToSizeFilter: ImageFilter, Sizable {
 
     /// The filter closure used to create the modified representation of the given image.
     public var filter: (Image) -> Image {
-        return { image in
-            return image.af_imageScaled(to: self.size)
+        return { photo in
+            return photo.af_imageScaled(to: self.size)
         }
     }
 }
@@ -194,8 +194,8 @@ public struct AspectScaledToFitSizeFilter: ImageFilter, Sizable {
 
     /// The filter closure used to create the modified representation of the given image.
     public var filter: (Image) -> Image {
-        return { image in
-            return image.af_imageAspectScaled(toFit: self.size)
+        return { photo in
+            return photo.af_imageAspectScaled(toFit: self.size)
         }
     }
 }
@@ -219,8 +219,8 @@ public struct AspectScaledToFillSizeFilter: ImageFilter, Sizable {
 
     /// The filter closure used to create the modified representation of the given image.
     public var filter: (Image) -> Image {
-        return { image in
-            return image.af_imageAspectScaled(toFill: self.size)
+        return { photo in
+            return photo.af_imageAspectScaled(toFill: self.size)
         }
     }
 }
@@ -252,8 +252,8 @@ public struct RoundedCornersFilter: ImageFilter, Roundable {
 
     /// The filter closure used to create the modified representation of the given image.
     public var filter: (Image) -> Image {
-        return { image in
-            return image.af_imageRounded(
+        return { photo in
+            return photo.af_imageRounded(
                 withCornerRadius: self.radius,
                 divideRadiusByImageScale: self.divideRadiusByImageScale
             )
@@ -278,8 +278,8 @@ public struct CircleFilter: ImageFilter {
 
     /// The filter closure used to create the modified representation of the given image.
     public var filter: (Image) -> Image {
-        return { image in
-            return image.af_imageRoundedIntoCircle()
+        return { photo in
+            return photo.af_imageRoundedIntoCircle()
         }
     }
 }
@@ -302,8 +302,8 @@ public protocol CoreImageFilter: ImageFilter {
 public extension ImageFilter where Self: CoreImageFilter {
 	/// The filter closure used to create the modified representation of the given image.
 	public var filter: (Image) -> Image {
-		return { image in
-            return image.af_imageFiltered(withCoreImageFilter: self.filterName, parameters: self.parameters) ?? image
+		return { photo in
+            return photo.af_imageFiltered(withCoreImageFilter: self.filterName, parameters: self.parameters) ?? photo
 		}
 	}
 

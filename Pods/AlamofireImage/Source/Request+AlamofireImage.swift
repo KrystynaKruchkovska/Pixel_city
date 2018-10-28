@@ -89,10 +89,10 @@ extension DataRequest {
             do {
                 try DataRequest.validateContentType(for: request, response: response)
 
-                let image = try DataRequest.image(from: data, withImageScale: imageScale)
-                if inflateResponseImage { image.af_inflate() }
+                let photo = try DataRequest.image(from: data, withImageScale: imageScale)
+                if inflateResponseImage { photo.af_inflate() }
 
-                return .success(image)
+                return .success(photo)
             } catch {
                 return .failure(error)
             }
@@ -172,8 +172,8 @@ extension DataRequest {
 
             imageData.append(chunkData)
 
-            if let image = DataRequest.serializeImage(from: imageData) {
-                completionHandler(image)
+            if let photo = DataRequest.serializeImage(from: imageData) {
+                completionHandler(photo)
             }
         }
     }
@@ -187,18 +187,18 @@ extension DataRequest {
         guard data.count > 0 else { return nil }
 
         do {
-            let image = try DataRequest.image(from: data, withImageScale: imageScale)
-            if inflateResponseImage { image.af_inflate() }
+            let photo = try DataRequest.image(from: data, withImageScale: imageScale)
+            if inflateResponseImage { photo.af_inflate() }
 
-            return image
+            return photo
         } catch {
             return nil
         }
     }
 
     private class func image(from data: Data, withImageScale imageScale: CGFloat) throws -> UIImage {
-        if let image = UIImage.af_threadSafeImage(with: data, scale: imageScale) {
-            return image
+        if let photo = UIImage.af_threadSafeImage(with: data, scale: imageScale) {
+            return photo
         }
 
         throw AFIError.imageSerializationFailed

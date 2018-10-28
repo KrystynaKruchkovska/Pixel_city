@@ -22,6 +22,9 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var pullUpView: UIView!
     
     
+    @IBOutlet weak var showTableViewBtn: RoundedBtn!
+    
+    
     let locationManager = CLLocationManager()
     let autherizationStatus = CLLocationManager.authorizationStatus()
     let ragionRadius:Double = 1000
@@ -43,6 +46,7 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         locationManager.delegate = self
         configureLocalService()
         longPressRecogniser()
+        showTableViewBtn.isHidden = true
         
         
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
@@ -50,6 +54,7 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         collectionView?.delegate = self
         collectionView?.dataSource = self
         collectionView?.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+
         
         pullUpView.addSubview(collectionView!)
         
@@ -65,6 +70,22 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
             mapView.showsUserLocation = true
         }
     }
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?)
+    {
+        if segue.destination is TableViewVC
+        {
+            let vc = segue.destination as? TableViewVC
+            vc?.imageArray = imageArray
+            vc?.imageInfoArray = imageInfoArray
+            
+        }
+    }
+    
+    
+    
+    
     
     func longPressRecogniser(){
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: #selector(MapVC.dropPin(_:)))
@@ -133,6 +154,14 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
+    
+    @IBAction func showInTableViewBtnPressed(_ sender: Any) {
+        performSegue(withIdentifier: "toTableView", sender: nil)
+    }
+    
+
+    
+    
 }
 extension MapVC: MKMapViewDelegate{
     
@@ -155,6 +184,10 @@ extension MapVC: MKMapViewDelegate{
     }
     
     
+    
+
+    
+    
     @objc func dropPin(_ gestureRecognizer : UIGestureRecognizer){
         
         if gestureRecognizer.state != .began { return }
@@ -173,6 +206,7 @@ extension MapVC: MKMapViewDelegate{
         addSwipe()
         addSpinner()
         addProgressLbl()
+        
         
         let touchPoint = gestureRecognizer.location(in: mapView)
         let touchMapCoordinate = mapView.convert(touchPoint, toCoordinateFrom: mapView)
@@ -196,6 +230,7 @@ extension MapVC: MKMapViewDelegate{
                         //hide lbl
                         self.collectionView?.reloadData()
                         //reload collectionView
+                        self.showTableViewBtn.isHidden = false
                     }
                 })
             }
@@ -224,11 +259,13 @@ extension MapVC: MKMapViewDelegate{
                 let photoOwner = photo["ownername"]
                 let description = photo["description"]!["_content"]
                 let dateTaken = photo["datetaken"]
+                let view = photo["views"]
                 var imageInfo = ImageInfo()
                 imageInfo.url = postUrl
                 imageInfo.ownerName = (photoOwner as! String)
                 imageInfo.description = (description as! String)
                 imageInfo.dateTaken = dateTaken as! String
+                imageInfo.views = (view as! String)
                 self.imageInfoArray.append(imageInfo)
             }
             
