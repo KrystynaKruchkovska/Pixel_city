@@ -219,7 +219,7 @@ extension MapVC: MKMapViewDelegate{
         
         mapView.addAnnotation(annotation)
         
-        print(flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: 40))
+        print(flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: NUMBER_OF_PHOTOS))
         retrieveUrls(forAnnotation: annotation) { (finished) in
             if finished{
                 self.retrieveImages(handler: { (finished) in
@@ -231,8 +231,13 @@ extension MapVC: MKMapViewDelegate{
                         self.collectionView?.reloadData()
                         //reload collectionView
                         self.showTableViewBtn.isHidden = false
+                        
+                        self.getFavorites(handler: { (finished) in
+                            
+                        })
                     }
                 })
+                
             }
         }
         
@@ -247,7 +252,7 @@ extension MapVC: MKMapViewDelegate{
     
     
     func retrieveUrls(forAnnotation annotation: DroppablePin, handler: @escaping (_ status: Bool) -> ()) {
-        let requestUrl = flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: 40)
+        let requestUrl = flickrUrl(forAPIKey: apiKey, withAnnotation: annotation, andNumberofPhotos: NUMBER_OF_PHOTOS)
         Alamofire.request(requestUrl).responseJSON { (response) in
             guard let json = response.result.value as? Dictionary<String, AnyObject> else { return }
             let photosDict = json["photos"] as! Dictionary<String, AnyObject>
@@ -255,17 +260,20 @@ extension MapVC: MKMapViewDelegate{
             for photo in photosArray {
                 let postUrl = "https://farm\(photo["farm"]!).staticflickr.com/\(photo["server"]!)/\(photo["id"]!)_\(photo["secret"]!)_h_d.jpg"
                 
-                
+                let photoId = photo["id"]
                 let photoOwner = photo["ownername"]
                 let description = photo["description"]!["_content"]
                 let dateTaken = photo["datetaken"]
                 let view = photo["views"]
                 var imageInfo = ImageInfo()
+                imageInfo.favourites = []
                 imageInfo.url = postUrl
                 imageInfo.ownerName = (photoOwner as! String)
                 imageInfo.description = (description as! String)
                 imageInfo.dateTaken = dateTaken as! String
                 imageInfo.views = (view as! String)
+                imageInfo.id = (photoId as! String)
+                
                 self.imageInfoArray.append(imageInfo)
             }
             
@@ -281,11 +289,13 @@ extension MapVC: MKMapViewDelegate{
         for item in self.imageInfoArray {
             
             Alamofire.request(item.url!).responseImage { (response) in
-                guard let image = response.result.value else {return}
+                guard let image = response.result.value else {
+                    return
+                }
                 
                 self.imageArray.append(image)
                 
-                self.progressLbl?.text = "\(self.imageArray.count)/40 IMAGES DOWNLOADED"
+                self.progressLbl?.text = "\(self.imageArray.count)/\(NUMBER_OF_PHOTOS) IMAGES DOWNLOADED"
                 
                 if self.imageArray.count == self.imageInfoArray.count{
                     handler(true)
@@ -294,6 +304,46 @@ extension MapVC: MKMapViewDelegate{
             }
         }
         
+    }
+    
+    func  getFavorites(handler: @escaping (_ status: Bool)-> ()){
+        
+        for i in 0...imageInfoArray.count - 1 {
+            var imageInfo = self.imageInfoArray[i]
+            
+            let favoritesRequest = favoritesUrl(forAPIKey: apiKey, id: imageInfo.id!)
+            
+            print("getFavourites url:\(favoritesRequest)")
+            
+            Alamofire.request(favoritesRequest).responseJSON { (response) in
+                
+                print("getFavourites: statusCode:\(response.response?.statusCode)")
+                
+                let error = response.result.error
+                
+                if let e = error {
+                    print("getFavourites error:\(e)")
+                    return
+                }
+                
+                guard let json = response.result.value as? Dictionary<String, AnyObject> else {
+                    return
+                }
+                
+                let photo = json["photo"] as! Dictionary<String, AnyObject>
+                let personsArray = photo["person"] as! [Dictionary<String, AnyObject>]
+                for person in personsArray{
+                    let username = person["username"]
+                    imageInfo.favourites!.append(username as! String)
+                }
+                
+                print("Favourites got: \(imageInfo.favourites?.count)")
+                
+                handler(true)
+            }
+            
+        }
+       
     }
     
     func cencelAllSessions(){

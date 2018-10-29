@@ -10,8 +10,10 @@ import UIKit
 
 struct ImageInfo {
     var url: String?
+    var id :String?
     var ownerName: String?
     var description: String?
     var dateTaken: String?
     var views : String?
+    var favourites : [String]?
 }
