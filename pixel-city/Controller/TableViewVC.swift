@@ -23,7 +23,6 @@ class TableViewVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
 
       
     }
-    
     @IBAction func backBtnPressed(_ sender: Any) {
         dismiss(animated: true, completion: nil)
     }

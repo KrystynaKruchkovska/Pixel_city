@@ -48,13 +48,7 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         longPressRecogniser()
         showTableViewBtn.isHidden = true
         
-        
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
-        collectionView?.register(PhotoCell.self, forCellWithReuseIdentifier: "photoCell")
-        collectionView?.delegate = self
-        collectionView?.dataSource = self
-        collectionView?.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
-
+        collectionViewAtributes()
         
         pullUpView.addSubview(collectionView!)
         
@@ -71,6 +65,16 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
+    func collectionViewAtributes(){
+        
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
+        collectionView?.register(PhotoCell.self, forCellWithReuseIdentifier: "photoCell")
+        collectionView?.delegate = self
+        collectionView?.dataSource = self
+        collectionView?.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
+
+    }
+    
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?)
     {
@@ -82,10 +86,6 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
             
         }
     }
-    
-    
-    
-    
     
     func longPressRecogniser(){
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: #selector(MapVC.dropPin(_:)))
